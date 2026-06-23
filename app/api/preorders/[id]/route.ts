@@ -9,6 +9,51 @@ const adapterFactory = new PrismaLibSql({
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 const prisma = new PrismaClient({ adapter: adapterFactory as any });
 
+export async function GET(
+  request: NextRequest,
+  { params }: { params: Promise<{ id: string }> },
+) {
+  try {
+    const { id } = await params;
+
+    // Validate ID parameter
+    const preorderId = parseInt(id);
+    if (isNaN(preorderId) || preorderId < 1) {
+      return NextResponse.json(
+        { error: "Invalid ID. Must be a positive integer" },
+        { status: 400 },
+      );
+    }
+
+    // Fetch the preorder
+    const preorder = await prisma.preorder.findUnique({
+      where: { id: preorderId },
+    });
+
+    if (!preorder) {
+      return NextResponse.json(
+        { error: `Preorder with ID ${preorderId} not found` },
+        { status: 404 },
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      data: preorder,
+    });
+  } catch (error) {
+    console.error("Error fetching preorder:", error);
+    return NextResponse.json(
+      {
+        success: false,
+        error: "Failed to fetch preorder",
+        message: error instanceof Error ? error.message : "Unknown error",
+      },
+      { status: 500 },
+    );
+  }
+}
+
 export async function PUT(
   request: NextRequest,
   { params }: { params: Promise<{ id: string }> },

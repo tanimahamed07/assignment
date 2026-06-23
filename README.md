@@ -8,6 +8,7 @@ A Next.js 16 application with a fully functional REST API for managing preorders
 - **TypeScript** for type safety
 - **Prisma 7** ORM with SQLite database
 - **RESTful API** with full CRUD operations
+- **Web Interface** for managing preorders
 - **Filtering & Sorting** capabilities
 - **Pagination** support
 - **Comprehensive validation** and error handling
@@ -53,6 +54,12 @@ npm run dev
 
 The server will start at `http://localhost:3000`
 
+**Access Points:**
+
+- **Home:** `http://localhost:3000`
+- **Preorders UI:** `http://localhost:3000/preorders`
+- **API Endpoints:** `http://localhost:3000/api/preorders/*`
+
 ### Production Build
 
 ```bash
@@ -88,11 +95,55 @@ curl -X POST http://localhost:3000/api/preorders/list \
   -d '{"filter": "active", "sortBy": "products", "sortOrder": "desc"}'
 ```
 
-### 2. Update Preorder Status
+### 2. Create Preorder
+
+**POST** `/api/preorders/create`
+
+Create a new preorder record.
+
+**Request Body:**
+
+```json
+{
+  "name": "Product Name",
+  "products": 100,
+  "preorderWhen": "regardless_of_stock",
+  "startsAt": "2027-01-01T00:00:00Z",
+  "endsAt": "2027-12-31T23:59:59Z", // optional
+  "status": true // optional, defaults to true
+}
+```
+
+**Example:**
+
+```bash
+curl -X POST http://localhost:3000/api/preorders/create \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "New Product",
+    "products": 150,
+    "preorderWhen": "regardless_of_stock",
+    "startsAt": "2027-01-01T00:00:00Z"
+  }'
+```
+
+### 3. Get Single Preorder
+
+**GET** `/api/preorders/{id}`
+
+Get a single preorder by ID for viewing or editing.
+
+**Example:**
+
+```bash
+curl -X GET http://localhost:3000/api/preorders/1
+```
+
+### 4. Update Preorder Status
 
 **PUT** `/api/preorders/{id}`
 
-Update the status of a specific preorder.
+Update only the status of a specific preorder.
 
 **Request Body:**
 
@@ -110,7 +161,40 @@ curl -X PUT http://localhost:3000/api/preorders/1 \
   -d '{"status": false}'
 ```
 
-### 3. Delete Preorder
+### 5. Full Update Preorder
+
+**PUT** `/api/preorders/{id}/update`
+
+Update all fields of a preorder.
+
+**Request Body:**
+
+```json
+{
+  "name": "Updated Name",
+  "products": 200,
+  "preorderWhen": "regardless_of_stock",
+  "startsAt": "2027-01-01T00:00:00Z",
+  "endsAt": "2027-12-31T23:59:59Z",
+  "status": false
+}
+```
+
+**Example:**
+
+```bash
+curl -X PUT http://localhost:3000/api/preorders/1/update \
+  -H "Content-Type: application/json" \
+  -d '{
+    "name": "Updated Product",
+    "products": 200,
+    "preorderWhen": "regardless_of_stock",
+    "startsAt": "2027-01-01T00:00:00Z",
+    "status": true
+  }'
+```
+
+### 6. Delete Preorder
 
 **DELETE** `/api/preorders/{id}`
 
@@ -122,6 +206,31 @@ Delete a specific preorder.
 curl -X DELETE http://localhost:3000/api/preorders/1
 ```
 
+## 🖥️ Web Interface
+
+A fully functional web interface is available at `/preorders` for managing preorders.
+
+### Features
+
+- **Data Table** with sortable columns
+- **Filter Buttons** - All, Active, Inactive
+- **Sort Controls** - Sort by Name, Products, or Start Date
+- **Pagination** - Navigate through large datasets
+- **Status Toggle** - Quick enable/disable preorders
+- **Bulk Selection** - Select multiple preorders with checkboxes
+- **Edit & Delete** - Direct actions from table rows
+- **Responsive Design** - Works on desktop and mobile devices
+
+### Usage
+
+1. **View Preorders:** Navigate to `http://localhost:3000/preorders`
+2. **Filter:** Click "All", "Active", or "Inactive" to filter results
+3. **Sort:** Select sort field and click arrow to toggle order
+4. **Toggle Status:** Click the switch to activate/deactivate a preorder
+5. **Edit:** Click the pencil icon to edit (edit page to be implemented)
+6. **Delete:** Click the trash icon to delete with confirmation
+7. **Navigate:** Use pagination buttons to view more records
+
 ## 🧪 Testing
 
 Test scripts are provided to verify all endpoints:
@@ -132,10 +241,28 @@ Test scripts are provided to verify all endpoints:
 npx tsx test-api.ts
 ```
 
-### Test Update Endpoint
+### Test Create Endpoint
+
+```bash
+npx tsx test-create-api.ts
+```
+
+### Test Get Endpoint
+
+```bash
+npx tsx test-get-api.ts
+```
+
+### Test Update Status Endpoint
 
 ```bash
 npx tsx test-update-api.ts
+```
+
+### Test Full Update Endpoint
+
+```bash
+npx tsx test-full-update-api.ts
 ```
 
 ### Test Delete Endpoint

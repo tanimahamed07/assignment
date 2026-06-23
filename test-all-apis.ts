@@ -97,10 +97,72 @@ async function testAllAPIs() {
   );
 
   console.log("═".repeat(60));
+  console.log("  GET ENDPOINT TESTS");
+  console.log("═".repeat(60) + "\n");
+
+  console.log("1️⃣1️⃣ Get single preorder by ID");
+  const get1 = await fetch(`${BASE_URL}/${testPreorder.id}`, {
+    method: "GET",
+  });
+  const getResult1 = await get1.json();
+  console.log(`   ✓ Status: ${get1.status}`);
+  console.log(`   ✓ Success: ${getResult1.success}`);
+  console.log(`   ✓ Name: ${getResult1.data.name}`);
+  console.log(`   ✓ Products: ${getResult1.data.products}\n`);
+
+  console.log("1️⃣2️⃣ Get non-existent preorder");
+  const get2 = await fetch(`${BASE_URL}/99999`, {
+    method: "GET",
+  });
+  const getResult2 = await get2.json();
+  console.log(`   ✓ Status: ${get2.status} (expected 404)`);
+  console.log(`   ✓ Error: ${getResult2.error}\n`);
+
+  console.log("═".repeat(60));
+  console.log("  INTEGRATION TEST");
+  console.log("═".repeat(60) + "\n");
+
+  console.log("1️⃣3️⃣ Full CRUD cycle: List → Get → Update → Get → Delete");
+  const cyclePreorder = listResult1.data[1];
+  console.log(`   Starting with preorder ID: ${cyclePreorder.id}`);
+
+  // Get
+  const getCycle = await fetch(`${BASE_URL}/${cyclePreorder.id}`, {
+    method: "GET",
+  });
+  const getCycleResult = await getCycle.json();
+  console.log(`   ✓ GET: ${getCycleResult.data.name}`);
+
+  // Update
+  await fetch(`${BASE_URL}/${cyclePreorder.id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status: !getCycleResult.data.status }),
+  });
+  console.log(`   ✓ PUT: Status toggled`);
+
+  // Get again
+  const getAfterUpdate = await fetch(`${BASE_URL}/${cyclePreorder.id}`, {
+    method: "GET",
+  });
+  const getAfterUpdateResult = await getAfterUpdate.json();
+  console.log(
+    `   ✓ GET: Verified status changed to ${getAfterUpdateResult.data.status}`,
+  );
+
+  // Restore
+  await fetch(`${BASE_URL}/${cyclePreorder.id}`, {
+    method: "PUT",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ status: getCycleResult.data.status }),
+  });
+  console.log(`   ✓ Restored original status\n`);
+
+  console.log("═".repeat(60));
   console.log("  ERROR HANDLING TESTS");
   console.log("═".repeat(60) + "\n");
 
-  console.log("7️⃣ Invalid ID format");
+  console.log("1️⃣4️⃣ Invalid ID format");
   const error1 = await fetch(`${BASE_URL}/abc`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -110,7 +172,7 @@ async function testAllAPIs() {
   console.log(`   ✓ Status: ${error1.status} (expected 400)`);
   console.log(`   ✓ Error: ${errorResult1.error}\n`);
 
-  console.log("8️⃣ Non-existent ID");
+  console.log("1️⃣5️⃣ Non-existent ID");
   const error2 = await fetch(`${BASE_URL}/99999`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -120,7 +182,7 @@ async function testAllAPIs() {
   console.log(`   ✓ Status: ${error2.status} (expected 404)`);
   console.log(`   ✓ Error: ${errorResult2.error}\n`);
 
-  console.log("9️⃣ Invalid status type");
+  console.log("1️⃣6️⃣ Invalid status type");
   const error3 = await fetch(`${BASE_URL}/${testPreorder.id}`, {
     method: "PUT",
     headers: { "Content-Type": "application/json" },
@@ -130,7 +192,7 @@ async function testAllAPIs() {
   console.log(`   ✓ Status: ${error3.status} (expected 400)`);
   console.log(`   ✓ Error: ${errorResult3.error}\n`);
 
-  console.log("🔟 Invalid filter in list");
+  console.log("1️⃣7️⃣ Invalid filter in list");
   const error4 = await fetch(`${BASE_URL}/list`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
@@ -141,10 +203,10 @@ async function testAllAPIs() {
   console.log(`   ✓ Error: ${errorResult4.error}\n`);
 
   console.log("═".repeat(60));
-  console.log("  INTEGRATION TEST");
+  console.log("  BATCH OPERATIONS TEST");
   console.log("═".repeat(60) + "\n");
 
-  console.log("1️⃣1️⃣ Toggle status of multiple preorders and count changes");
+  console.log("1️⃣8️⃣ Toggle status of multiple preorders and count changes");
   const before = await fetch(`${BASE_URL}/list`, {
     method: "POST",
     headers: { "Content-Type": "application/json" },
