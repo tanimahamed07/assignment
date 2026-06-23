@@ -457,7 +457,7 @@ export default function PreordersPage() {
                         <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
                           <div className="flex gap-2 justify-end">
                             <Link
-                              href={`/preorders/${preorder.id}/edit`}
+                              href={`/preorders/${preorder.id}`}
                               className="text-blue-600 hover:text-blue-900 transition-colors"
                               title="Edit"
                             >
